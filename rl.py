@@ -143,25 +143,28 @@ class ModelBasedLearner(ReinforcementLearner):
                 break
             v = v_new
 
-        # Note: Repeated code seems like it can be refactored. There a some minor differences between the updating and the value iteration.        
-
         # Update policy based on results of value iteration
+
         for state in range(self.numStates):
-            total_transitions = sum(self.tCounts[state][action].values()) 
-            if total_transitions > 0:
                 best_action = None
                 max_action_value = float('-inf')
+
                 for action in range(self.numActions):
-                    
+                    total_transitions = sum(self.tCounts[state][action].values())
+                    if total_transitions == 0:
+                        continue
                     action_value = 0
+
                     for next_state, count in self.tCounts[state][action].items():
                         transition_probability = count / total_transitions
                         expected_reward = self.rTotal[state][action][next_state] / count
-                        action_value += transition_probability * (expected_reward + (self.gamma * v_new[next_state]) ) #difference here
-                    max(action_value, max_action_value)
-git 
-                # Update the policy for this state with the best action
-                self.pi[state] = best_action #difference here
+                        action_value += transition_probability * (expected_reward + (self.gamma * v_new[next_state]) )
+
+                    if action_value > max_action_value:
+                        max_action_value = action_value
+                        best_action = action
+
+                self.pi[state] = best_action
 
 
 
