@@ -121,22 +121,22 @@ class ModelBasedLearner(ReinforcementLearner):
             v_new = v[:]
 
             for state in range(self.numStates):
-                max_value = float('-inf')
+                max_value_iteration = float('-inf')
                 
                 for action in range(self.numActions):
                     total_transitions = sum(self.tCounts[state][action].values())
                     if total_transitions == 0:
                         continue  # Skip if counts are zero
 
-                    action_value = 0
+                    value_iteration = 0
                     for next_state, count in self.tCounts[state][action].items():
                         transition_probability = count / total_transitions
                         expected_reward = self.rTotal[state][action][next_state] / count
-                        action_value += transition_probability * (expected_reward + (self.gamma * v[next_state]) )
+                        value_iteration += transition_probability * (expected_reward + (self.gamma * v[next_state]) )
 
-                    max_value = max(max_value, action_value)
+                    max_value_iteration = max(max_value_iteration, value_iteration)
                 
-                v_new[state] = max_value
+                v_new[state] = max_value_iteration
 
             # Check for convergence
             if all(abs(new - prev) <= self.valueConvergence for new, prev in zip(v_new, v)):
@@ -147,21 +147,21 @@ class ModelBasedLearner(ReinforcementLearner):
 
         for state in range(self.numStates):
                 best_action = None
-                max_action_value = float('-inf')
+                max_value_iteration = float('-inf')
 
                 for action in range(self.numActions):
                     total_transitions = sum(self.tCounts[state][action].values())
                     if total_transitions == 0:
                         continue
-                    action_value = 0
+                    value_iteration = 0
 
                     for next_state, count in self.tCounts[state][action].items():
                         transition_probability = count / total_transitions
                         expected_reward = self.rTotal[state][action][next_state] / count
-                        action_value += transition_probability * (expected_reward + (self.gamma * v_new[next_state]) )
+                        value_iteration += transition_probability * (expected_reward + (self.gamma * v_new[next_state]) )
 
-                    if action_value > max_action_value:
-                        max_action_value = action_value
+                    if value_iteration > max_value_iteration:
+                        max_value_iteration = value_iteration
                         best_action = action
 
                 self.pi[state] = best_action
