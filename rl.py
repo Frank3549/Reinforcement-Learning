@@ -138,7 +138,8 @@ class ModelBasedLearner(ReinforcementLearner):
 
                     max_value_iteration = max(max_value_iteration, value_iteration)
                 
-                v_new[state] = max_value_iteration
+                if max_value_iteration != float('-inf'):
+                    v_new[state] = max_value_iteration
 
             # Check for convergence
             if all(abs(new - prev) <= self.valueConvergence for new, prev in zip(v_new, v)):
@@ -148,7 +149,7 @@ class ModelBasedLearner(ReinforcementLearner):
         # Update policy based on results of value iteration
 
         for state in range(self.numStates):
-            best_action = None
+            best_actions = []
             max_value_iteration = float('-inf')
 
             for action in range(self.numActions):
@@ -166,9 +167,13 @@ class ModelBasedLearner(ReinforcementLearner):
 
                 if value_iteration > max_value_iteration:
                     max_value_iteration = value_iteration
-                    best_action = action
+                    best_actions = [action]
+                elif value_iteration == max_value_iteration:
+                    best_actions.append(action)    
 
-            self.pi[state] = best_action
+            self.pi[state] = random.choice(best_actions) if best_actions else random.randint(0, self.numActions - 1)
+
+
 
 
 
