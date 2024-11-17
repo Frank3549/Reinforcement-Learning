@@ -148,27 +148,27 @@ class ModelBasedLearner(ReinforcementLearner):
         # Update policy based on results of value iteration
 
         for state in range(self.numStates):
-                best_action = None
-                max_value_iteration = float('-inf')
+            best_action = None
+            max_value_iteration = float('-inf')
 
-                for action in range(self.numActions):
-                    total_transitions = sum(self.tCounts[state][action].values())
-                    if total_transitions == 0:
+            for action in range(self.numActions):
+                total_transitions = sum(self.tCounts[state][action].values())
+                if total_transitions == 0:
+                    continue
+                value_iteration = 0
+
+                for next_state, count in self.tCounts[state][action].items():
+                    if count == 0:
                         continue
-                    value_iteration = 0
+                    transition_probability = count / total_transitions
+                    expected_reward = self.rTotal[state][action][next_state] / count
+                    value_iteration += transition_probability * (expected_reward + (self.gamma * v_new[next_state]) )
 
-                    for next_state, count in self.tCounts[state][action].items():
-                        if count == 0:
-                            continue
-                        transition_probability = count / total_transitions
-                        expected_reward = self.rTotal[state][action][next_state] / count
-                        value_iteration += transition_probability * (expected_reward + (self.gamma * v_new[next_state]) )
+                if value_iteration > max_value_iteration:
+                    max_value_iteration = value_iteration
+                    best_action = action
 
-                    if value_iteration > max_value_iteration:
-                        max_value_iteration = value_iteration
-                        best_action = action
-
-                self.pi[state] = best_action
+            self.pi[state] = best_action
 
 
 
