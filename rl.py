@@ -130,6 +130,8 @@ class ModelBasedLearner(ReinforcementLearner):
 
                     value_iteration = 0
                     for next_state, count in self.tCounts[state][action].items():
+                        if count == 0:
+                            continue
                         transition_probability = count / total_transitions
                         expected_reward = self.rTotal[state][action][next_state] / count
                         value_iteration += transition_probability * (expected_reward + (self.gamma * v[next_state]) )
@@ -156,6 +158,8 @@ class ModelBasedLearner(ReinforcementLearner):
                     value_iteration = 0
 
                     for next_state, count in self.tCounts[state][action].items():
+                        if count == 0:
+                            continue
                         transition_probability = count / total_transitions
                         expected_reward = self.rTotal[state][action][next_state] / count
                         value_iteration += transition_probability * (expected_reward + (self.gamma * v_new[next_state]) )
