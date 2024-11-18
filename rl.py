@@ -171,6 +171,7 @@ class ModelBasedLearner(ReinforcementLearner):
                 elif value_iteration == max_value_iteration:
                     best_actions.append(action)    
 
+            # Randomly select from the best actions or choose a random action if no best actions
             self.pi[state] = random.choice(best_actions) if best_actions else random.randint(0, self.numActions - 1)
 
 
@@ -203,18 +204,27 @@ class QLearner(ReinforcementLearner):
 
     def action(self, state: int) -> int:
         """Returns a greedy action with respect to the current Q function (breaking ties randomly)."""
-        # TODO: Implement greedy action selection
-        return 0
+        best_actions = []
+        best_action_value = float('-inf')
+        for action in range(self.numActions):
+            if self.q[state][action] > best_action_value:
+                best_action_value = self.q[state][action]
+                best_actions = [action]
+            elif self.q[state][action] == best_action_value:
+                best_actions.append(action)
+        return random.choice(best_actions)
 
     def epsilonAction(self, step: int, state: int) -> int:
         """With probability epsilon returns a uniform random action. Otherwise it returns a greedy action with respect to the current Q function (breaking ties randomly)."""
-        # TODO: Implement epsilon-greedy action selection
-        return 0
+        if random.random() < self.epsilon:
+            return random.randint(0, self.numActions - 1)
+        return self.action(state)
 
     def learningStep(self, step: int, curState, action, reward, nextState):
         """Performs a Q-learning step based on the given transition, action and reward."""
-        # TODO: Implement the Q-learning step
+        self.q[curState][action] += self.alpha * (reward + self.gamma * max(self.q[nextState]) - self.q[curState][action])
 
     def terminalStep(self, step: int, curState: int, action: int, reward: float, nextState: int):
         """Performs the last learning step of an episode. Because the episode has terminated, the next Q-value is 0."""
-        # TODO: Implement the terminal step of the learning algorithm
+        self.q[curState][action] += self.alpha * (reward - self.q[curState][action])
+
